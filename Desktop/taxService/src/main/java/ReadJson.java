@@ -1,52 +1,85 @@
-import java.io.FileReader;
-import java.io.StringReader;
-import java.util.Iterator;
-import java.util.Map;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import vd.Data;
+import vd.VD;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.parser.JSONParser;
-import org.json.JSONArray;
-import org.json.JSONObject;
+public class Main {
+    public static void main(String[] args) throws IOException {
+        ReadExcel readExcel = new ReadExcel();
+        List<String> vergiNo = readExcel.readExcel();
+        vergiNo.listIterator().next();
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
 
-public class ReadJson
-{
-    public static void main(String[] args) throws Exception
-    {
-        JSONParser parse = new JSONParser();
-//Type caste the parsed json data in json object
-        JSONObject jobj = (JSONObject)parse.parse(inline);
-//Store the JSON object in JSON array as objects (For level 1 array element i.e Results)
-        JSONArray jsonarr_1 = (JSONArray) jobj.get("results");
-//Get data for Results array
-        for(int i=0;i<jsonarr_1.length();i++)
-        {
-            //Store the JSON objects in an array
-            //Get the index of the JSON object and print the values as per the index
-            JSONObject jsonobj_1 = (JSONObject)jsonarr_1.get(i);
-            //Store the JSON object in JSON array as objects (For level 2 array element i.e Address Components)
-            JSONArray jsonarr_2 = (JSONArray) jsonobj_1.get("address_components");
-            System.out.println("Elements under results array");
-            System.out.println("\nPlace id: " +jsonobj_1.get("place_id"));
-            System.out.println("Types: "  +jsonobj_1.get("types"));
-            //Get data for the Address Components array
-            System.out.println("Elements under address_components array");
-            System.out.println("The long names, short names and types are:");
-            for(int j=0;j<jsonarr_2.length();j++)
-            {
-                //Same just store the JSON objects in an array
-                //Get the index of the JSON objects and print the values as per the index
-                JSONObject jsonobj_2 = (JSONObject) jsonarr_2.get(j);
-                //Store the data as String objects
-                String str_data1 = (String) jsonobj_2.get("long_name");
-                System.out.println(str_data1);
-                String str_data2 = (String) jsonobj_2.get("short_name");
-                System.out.println(str_data2);
-                System.out.println(jsonobj_2.get("types"));
-                System.out.println("\n");
+        try{
+            String il = "034";
+
+            //String daireNo = "038104";
+            //istanbul vergi dairesi index => 203-298
+            //bursa 105-260
+
+            List<Integer> vdList = new ArrayList<>();
+
+            for(int i=203; i<299; i++){
+                vdList.add(i);
             }
+
+            ObjectMapper mapper = new ObjectMapper();
+            for(String vkn : vergiNo){
+                System.out.println("||Vergi Kimlik||"+vkn+"\t");
+                AtomicReference<Boolean> isFound = new AtomicReference<>(false);
+                vdList.parallelStream().forEach((Integer i) -> {
+                    System.out.println("HERE=>"+i);
+                    HttpResponse jsonResponse = Unirest.post("https://ivd.gib.gov.tr/tvd_server/dispatch")
+                            .body("cmd=vergiNoIslemleri_vergiNumarasiSorgulama&callid=1e3cfc764dfbb-11&pageName=R_INTVRG_INTVD_VERGINO_DOGRULAMA&token=d1078f5e3dc646b78d5d4e5842f21e97feb48d366bc7617458b6679dec12675154a01fccc42292bb04d926bc259dbc75e39dd8e202535fd70a7098396c74a6f7&jp=%7B%22dogrulama%22%3A%7B%22vkn1%22%3A%22"+vkn+"%22%2C%22tckn1%22%3A%22%22%2C%22iller%22%3A%22"+il+"%22%2C%22vergidaireleri%22%3A%22"+il+i+"%22%7D%2C%22dyntab2%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab3%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab4%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab5%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%7D")
+                            .header("accept", "application/json")
+                            .header("accept-language", "en-US,en;q=0.9")
+                            .header("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+                            .asJson();
+
+
+                    String currentString =  jsonResponse.getBody().toString();
+                    try {
+                        VD vd = mapper.readValue(currentString, new TypeReference<VD>() {});
+                        if(vd == null || vd.getData() == null || vd.toString().startsWith("null$")) return;
+                        isFound.set(true);
+                        System.out.println(jsonResponse.getBody());
+
+                        writeFile(vd.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                if(!isFound.get()){
+                    VD vd = new VD();
+                    Data data = new Data();
+                    data.setDurum("N/A");
+                    data.setDurum_text("N/A");
+                    data.setVkn(vkn);
+                    vd.setData(data);
+                    System.out.println(vd.toString());
+                    writeFile(vd.toString());
+                }
+            }
+
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
     }
+    public static void writeFile(String str) throws IOException {
+        File fileName = new File("C:\\Users\\geatalay\\Desktop\\Vergi_numarasi_kontrol\\f.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName,true));
+        writer.append(str);
+        writer.append(System.getProperty("line.separator"));
+        writer.close();
+    }
+
 }
