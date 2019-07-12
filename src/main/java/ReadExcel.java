@@ -30,8 +30,9 @@ public class ReadExcel {
     }
 
 
-    public List<String> readExcel() throws IOException {
-        File excelFile = new File("C:\\Users\\geatalay\\Desktop\\tapdkiptal.xlsx");
+    public List<String> readExcel(String path) throws IOException {
+
+        File excelFile = new File(path);
         FileInputStream fis = new FileInputStream(excelFile);
 
         List<String> vNoList = Lists.newArrayList();

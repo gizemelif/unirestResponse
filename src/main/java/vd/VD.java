@@ -45,7 +45,10 @@ public class VD {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if(this.data != null){
-            sb.append(this.getData().getDurum()).append("$").append(this.getData().getDurum_text()).append("$").append(this.getData().getTckn()).append("$").append(this.getData().getUnvan()).append("$").append(this.getData().getVdkodu()).append("$").append(this.getData().getVkn()).append("|");
+            sb.append(this.getData().getDurum()).append("$").append(this.getData().getDurum_text()).append("$").append(this.getData().getTckn()).append("$").append(this.getData().getUnvan()).append("$").append(this.getData().getVdkodu()).append("$").append(this.getData().getVkn());
+        }
+        else{
+            sb.append(getData().getVkn());
         }
         return sb.toString();
     }
