@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Main {
     public static void main(String[] args) throws IOException{
 
-        String filePath = "C:\\Users\\geatalay\\Desktop\\Vergi_numarasi_kontrol\\ankara_tc_no_sorgu.json";
+        String filePath = "C:\\Users\\geatalay\\Desktop\\Vergi_numarasi_kontrol\\ankara_tc_no.json";
         String fileString = new String(Files.readAllBytes(Paths.get(filePath)),StandardCharsets.UTF_8);
 
 
@@ -81,7 +81,7 @@ public class Main {
                 AtomicReference<Boolean> isFound = new AtomicReference<>(false);
 
                 HttpResponse jsonResponse = Unirest.post("https://ivd.gib.gov.tr/tvd_server/dispatch")
-                        .body("cmd=vergiNoIslemleri_vergiNumarasiSorgulama&callid=1e3cfc764dfbb-11&pageName=R_INTVRG_INTVD_VERGINO_DOGRULAMA&token=d1078f5e3dc646b78d5d4e5842f21e97feb48d366bc7617458b6679dec12675154a01fccc42292bb04d926bc259dbc75e39dd8e202535fd70a7098396c74a6f7&jp=%7B%22dogrulama%22%3A%7B%22vkn1%22%3A%22vkn%22%2C%22tckn1%22%3A%22%22%2C%22iller%22%3A%22034%22%2C%22vergidaireleri%22%3A%22" + key + "%22%7D%2C%22dyntab2%22%3A%7B%22"+governmentNumber+"%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab3%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab4%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab5%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%7D")
+                        .body("cmd=vergiNoIslemleri_vergiNumarasiSorgulama&callid=1e3cfc764dfbb-11&pageName=R_INTVRG_INTVD_VERGINO_DOGRULAMA&token=d1078f5e3dc646b78d5d4e5842f21e97feb48d366bc7617458b6679dec12675154a01fccc42292bb04d926bc259dbc75e39dd8e202535fd70a7098396c74a6f7&jp=%7B%22dogrulama%22%3A%7B%22vkn1%22%3A%22%22%2C%22tckn1%22%3A%22"+governmentNumber+"%22%2C%22iller%22%3A%22006%22%2C%22vergidaireleri%22%3A%22"+ key +"%22%7D%2C%22dyntab2%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab3%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab4%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%2C%22dyntab5%22%3A%7B%22tckn%22%3A%22%22%2C%22vkn%22%3A%22%22%2C%22unvan%22%3A%22%22%2C%22vergidairesi%22%3A%22%22%2C%22faaliyetdurum%22%3A%22%22%7D%7D")
                         .header("accept", "application/json")
                         .header("accept-language", "en-US,en;q=0.9")
                         .header("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
@@ -114,7 +114,7 @@ public class Main {
 
                             System.out.println(statusText);
 
-                            writeFile(vd.toString()+"$"+jsonBody+"$"+statusText);
+                            writeFile("TCKN SORGU"+"$"+gvgUid+"$"+vd.toString()+"$"+cityName+"$"+jsonBody+"$"+statusText);
 
                         }
                         continue;
